@@ -68,44 +68,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Проверяем, мобильное ли устройство
+    const isMobile = window.innerWidth <= 768;
+
+    // Анимация для всех элементов
     gsap.utils.toArray('.title, .content-item, .composition__title, .composition__text, .composition__inner-text, .choose-color__list, .case__title main__title, .energy__title main__title, .audio__box').forEach((item) => {
-        let startTrigger = 'top 100%';
+        let startTrigger = 'top 167%';
         let endTrigger = 'top 15%';
 
-        // Проверяем, мобильное ли устройство
-        if (window.innerWidth <= 768) { // 768px - стандарт для мобильных устройств
-            startTrigger = 'top 100%'; // Появление с верхней части экрана
-            endTrigger = 'top 50%'; // Останется видимым чуть дольше
+        // Если мобильная версия, убираем анимацию для первой секции и кнопок выбора наушников
+        if (isMobile) {
+            if (item.classList.contains('header__content') || item.classList.contains('choose-color__list')) {
+                return; // Пропускаем анимацию для этих элементов
+            }
         }
 
-        // Для блока с выбором наушников НЕ даем исчезать
-        const isHeadphonesSelector = item.classList.contains('choose-color__list');
-        const isHeadphonesText = item.classList.contains('choose-color__text'); // Проверка для текста наушников на первом экране
-        const isHeaderContent = item.classList.contains('header__content'); // Для первой секции (header__content)
-
-        if (isHeadphonesSelector || isHeadphonesText) {
-            // Появление наушников с верхней части экрана, но не исчезают
-            startTrigger = 'top 100%'; // Элемент появляется с верхней части экрана
-            endTrigger = 'top 50%'; // Останется видимым дольше
-        } else if (isHeaderContent) {
-            // Для первой секции, чтобы она не исчезала, но появлялась, когда автор поднимет страницу
-            startTrigger = 'top 100%'; // Появление с верхней части экрана
-            endTrigger = 'top 100%';  // Останется на экране при прокрутке вверх
+        // Для картинок наушников (чтобы они не исчезали сразу)
+        if (item.classList.contains('choose-color__list')) {
+            startTrigger = 'top 137%'; // Убедимся, что анимация будет начинаться только когда элемент войдёт в поле зрения
+            endTrigger = 'top 30%'; // Анимация продолжится до того, как элемент почти покинет экран
         }
 
+        // Стандартная анимация для остальных элементов
         gsap.fromTo(
             item,
             { y: 100, opacity: 0 },
             {
                 y: 0,
                 opacity: 1,
-                duration: 1.5, // Уменьшаем длительность анимации для улучшения быстродействия
+                duration: 1.5,
                 ease: 'power4.out',
                 scrollTrigger: {
                     trigger: item,
                     start: startTrigger,
                     end: endTrigger,
-                    toggleActions: isHeaderContent ? 'play none none none' : 'play reverse play reverse', // Для header__content элемент не исчезает
+                    toggleActions: 'play reverse play reverse', // Появление и исчезновение на скролле
                 },
             }
         );
