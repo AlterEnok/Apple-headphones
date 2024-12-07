@@ -69,87 +69,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.addEventListener("DOMContentLoaded", () => {
     gsap.utils.toArray('.title, .content-item, .composition__title, .composition__text, .composition__inner-text, .choose-color__list, .case__title main__title, .energy__title main__title, .audio__box').forEach((item) => {
-        let startTrigger = 'top 127%';
+        let startTrigger = 'top 100%';
         let endTrigger = 'top 15%';
 
         // Проверяем, мобильное ли устройство
         if (window.innerWidth <= 768) { // 768px - стандарт для мобильных устройств
-            startTrigger = 'top 200%'; // Ранний старт для мобильных устройств
-            endTrigger = 'top 40%'; // Увеличенный диапазон видимости, чтобы элементы не исчезали слишком рано
+            startTrigger = 'top 100%'; // Появление с верхней части экрана
+            endTrigger = 'top 50%'; // Останется видимым чуть дольше
         }
 
-        // Для блока с выбором наушников увеличиваем диапазон видимости ещё больше
+        // Для блока с выбором наушников НЕ даем исчезать
         const isHeadphonesSelector = item.classList.contains('choose-color__list');
-        if (isHeadphonesSelector) {
-            startTrigger = 'top 150%'; // Появление кнопок раньше
-            endTrigger = 'bottom 30%'; // Исчезновение только когда почти полностью выйдут за экран
+        const isHeadphonesText = item.classList.contains('choose-color__text'); // Проверка для текста наушников на первом экране
+        const isHeaderContent = item.classList.contains('header__content'); // Для первой секции (header__content)
 
-            // Обеспечиваем анимацию и повторное появление
-            gsap.fromTo(
-                item,
-                { y: 100, opacity: 0 },
-                {
-                    y: 0,
-                    opacity: 1,
-                    duration: 1, // Уменьшаем длительность анимации для улучшения быстродействия на мобиле
-                    ease: 'power4.out',
-                    scrollTrigger: {
-                        trigger: item,
-                        start: startTrigger,
-                        end: endTrigger,
-                        toggleActions: 'play reverse play reverse', // Появление и исчезновение на скролле
-                    },
-                }
-            );
-        } else {
-            // Стандартная анимация для остальных элементов
-            gsap.fromTo(
-                item,
-                { y: 100, opacity: 0 },
-                {
-                    y: 0,
-                    opacity: 1,
-                    duration: 1, // Уменьшаем длительность анимации для улучшения быстродействия на мобиле
-                    ease: 'power4.out',
-                    scrollTrigger: {
-                        trigger: item,
-                        start: startTrigger,
-                        end: endTrigger,
-                        toggleActions: 'play reverse play reverse',
-                    },
-                }
-            );
+        if (isHeadphonesSelector || isHeadphonesText) {
+            // Появление наушников с верхней части экрана, но не исчезают
+            startTrigger = 'top 100%'; // Элемент появляется с верхней части экрана
+            endTrigger = 'top 50%'; // Останется видимым дольше
+        } else if (isHeaderContent) {
+            // Для первой секции, чтобы она не исчезала, но появлялась, когда автор поднимет страницу
+            startTrigger = 'top 100%'; // Появление с верхней части экрана
+            endTrigger = 'top 100%';  // Останется на экране при прокрутке вверх
         }
-    });
 
-    const colorButtons = document.querySelectorAll(".choose-color__btn");
-    const headerButton = document.querySelector(".header__button"); // Предположим, что этот элемент есть в хедере
-    const images = document.querySelectorAll(".content-item"); // Все картинки на странице, которые нужно изменить
-
-    colorButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-            // Убираем класс активности со всех кнопок
-            colorButtons.forEach((btn) => btn.classList.remove("choose-color__btn--active"));
-
-            // Добавляем класс активности выбранной кнопке
-            button.classList.add("choose-color__btn--active");
-
-            // Получаем цвет, который выбран
-            const selectedColor = button.dataset.button;
-
-            // Меняем цвет кнопки в хедере
-            if (headerButton) {
-                headerButton.className = `header__button ${selectedColor}`;
+        gsap.fromTo(
+            item,
+            { y: 100, opacity: 0 },
+            {
+                y: 0,
+                opacity: 1,
+                duration: 1.5, // Уменьшаем длительность анимации для улучшения быстродействия
+                ease: 'power4.out',
+                scrollTrigger: {
+                    trigger: item,
+                    start: startTrigger,
+                    end: endTrigger,
+                    toggleActions: isHeaderContent ? 'play none none none' : 'play reverse play reverse', // Для header__content элемент не исчезает
+                },
             }
-
-            // Обновляем картинки на соответствующие
-            images.forEach((image) => {
-                if (image.classList.contains(selectedColor)) {
-                    image.classList.add("content-item__active"); // Показываем картинку
-                } else {
-                    image.classList.remove("content-item__active"); // Скрываем картинку
-                }
-            });
-        });
+        );
     });
 });
